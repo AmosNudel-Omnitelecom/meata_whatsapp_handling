@@ -4,7 +4,7 @@ import { PhoneNumber, PhoneNumbersResponse } from '../types';
 export const phoneNumbersApi = createApi({
   reducerPath: 'phoneNumbersApi',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: 'http://localhost:9000/',
+    baseUrl: process.env.REACT_APP_API_URL || 'http://localhost:9000/',
   }),
   tagTypes: ['PhoneNumbers'],
   endpoints: (builder) => ({

@@ -4,7 +4,7 @@ import { WABA, WABAResponse, WABAPhoneNumber, WABAPhoneNumbersResponse } from '.
 export const wabaApi = createApi({
   reducerPath: 'wabaApi',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: 'http://localhost:9000/',
+    baseUrl: process.env.REACT_APP_API_URL || 'http://localhost:9000/',
   }),
   tagTypes: ['WABAs', 'WABAPhoneNumbers'],
   endpoints: (builder) => ({
