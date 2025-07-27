@@ -21,19 +21,6 @@ const WABAList: React.FC<WABAListProps> = ({ onWABASelect, selectedWABAId }) => 
     onWABASelect(wabaId);
   };
 
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case 'APPROVED':
-        return 'status-approved';
-      case 'PENDING':
-        return 'status-pending';
-      case 'REJECTED':
-        return 'status-rejected';
-      default:
-        return 'status-unknown';
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="waba-list-container">

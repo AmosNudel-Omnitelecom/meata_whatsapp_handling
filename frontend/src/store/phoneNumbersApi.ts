@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { PhoneNumber, PhoneNumbersResponse } from '../types';
+import { PhoneNumbersResponse } from '../types';
 
 export const phoneNumbersApi = createApi({
   reducerPath: 'phoneNumbersApi',

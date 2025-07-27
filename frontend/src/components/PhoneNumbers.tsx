@@ -4,9 +4,9 @@ import './PhoneNumbers.css';
 
 const PhoneNumbers: React.FC = () => {
   const { data, error, isLoading, refetch } = useGetPhoneNumbersQuery();
-  const [deletePhoneNumber, { isLoading: isDeleting }] = useDeletePhoneNumberMutation();
-  const [requestVerificationCode, { isLoading: isRequestingCode }] = useRequestVerificationCodeMutation();
-  const [verifyCode, { isLoading: isVerifying }] = useVerifyCodeMutation();
+  const [deletePhoneNumber] = useDeletePhoneNumberMutation();
+  const [requestVerificationCode] = useRequestVerificationCodeMutation();
+  const [verifyCode] = useVerifyCodeMutation();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [requestingCodeId, setRequestingCodeId] = useState<string | null>(null);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);

@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { WABA, WABAResponse, WABAPhoneNumber, WABAPhoneNumbersResponse } from '../types';
+import { WABAResponse, WABAPhoneNumbersResponse } from '../types';
 
 export const wabaApi = createApi({
   reducerPath: 'wabaApi',
