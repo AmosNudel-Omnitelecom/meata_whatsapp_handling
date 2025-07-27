@@ -1,46 +1,76 @@
-# Getting Started with Create React App
+# WhatsApp Business API Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a React frontend application that integrates with the WhatsApp Business API backend using Redux Toolkit and RTK Query.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Phone Numbers Management**: View and manage phone numbers from the WhatsApp Business API
+- **Real-time Data**: Automatic data fetching and caching with RTK Query
+- **Modern UI**: Clean, responsive design with professional styling
+- **Error Handling**: Comprehensive error handling and loading states
 
-### `npm start`
+## Setup
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. Install dependencies:
+```bash
+npm install
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+2. Start the development server:
+```bash
+npm start
+```
 
-### `npm test`
+3. Make sure the backend server is running on `http://localhost:9000`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Project Structure
 
-### `npm run build`
+```
+src/
+├── components/
+│   ├── PhoneNumbers.tsx    # Phone numbers display component
+│   └── PhoneNumbers.css    # Component styles
+├── store/
+│   ├── store.ts            # Redux store configuration
+│   └── phoneNumbersApi.ts  # RTK Query API slice
+├── types/
+│   └── index.ts            # TypeScript type definitions
+└── App.tsx                 # Main application component
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## API Integration
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The frontend uses RTK Query to handle API calls to the backend:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **GET /phone-numbers**: Fetches all phone numbers
+- Automatic caching and background refetching
+- Loading and error states handled automatically
 
-### `npm run eject`
+## Components
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### PhoneNumbers
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Displays a list of phone numbers with their verification status. Features:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- Real-time data fetching
+- Refresh functionality
+- Error handling with retry option
+- Responsive grid layout
+- Status indicators with color coding
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## Development
 
-## Learn More
+To add new API endpoints:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. Add new endpoints to the appropriate API slice in `store/`
+2. Create corresponding components in `components/`
+3. Add types to `types/index.ts`
+4. Update the main App component to include new components
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Styling
+
+The application uses CSS modules and follows a modern design system with:
+- Clean, professional appearance
+- Responsive design
+- Hover effects and transitions
+- Consistent color scheme
