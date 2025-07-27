@@ -2,6 +2,8 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 import PhoneNumbers from './components/PhoneNumbers';
+import AddPhoneNumber from './components/AddPhoneNumber';
+import FacebookSignup from './components/FacebookSignup';
 import './App.css';
 
 function App() {
@@ -12,6 +14,8 @@ function App() {
           <h1>WhatsApp Business API Manager</h1>
         </header>
         <main>
+          <FacebookSignup />
+          <AddPhoneNumber />
           <PhoneNumbers />
         </main>
       </div>

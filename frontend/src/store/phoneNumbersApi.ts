@@ -34,7 +34,15 @@ export const phoneNumbersApi = createApi({
       }),
       invalidatesTags: ['PhoneNumbers'],
     }),
+    addPhoneNumber: builder.mutation<void, string>({
+      query: (phoneNumber) => ({
+        url: 'add-phone-number',
+        method: 'POST',
+        body: { phone_number: phoneNumber },
+      }),
+      invalidatesTags: ['PhoneNumbers'],
+    }),
   }),
 });
 
-export const { useGetPhoneNumbersQuery, useDeletePhoneNumberMutation, useRequestVerificationCodeMutation, useVerifyCodeMutation } = phoneNumbersApi; 
+export const { useGetPhoneNumbersQuery, useDeletePhoneNumberMutation, useRequestVerificationCodeMutation, useVerifyCodeMutation, useAddPhoneNumberMutation } = phoneNumbersApi; 
