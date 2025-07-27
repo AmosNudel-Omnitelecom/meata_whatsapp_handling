@@ -1,0 +1,181 @@
+.waba-list-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+  overflow: hidden;
+}
+
+.waba-list-header {
+  background: #f8f9fa;
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.waba-list-header h2 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.waba-tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.tab {
+  padding: 10px 20px;
+  border: none;
+  background: #e9ecef;
+  color: #6c757d;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  background: #dee2e6;
+  color: #495057;
+}
+
+.tab.active {
+  background: #007bff;
+  color: white;
+}
+
+.tab:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tab:disabled:hover {
+  background: #e9ecef;
+  color: #6c757d;
+}
+
+.waba-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.waba-item {
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.waba-item:hover {
+  background-color: #f8f9fa;
+}
+
+.waba-item.selected {
+  background-color: #e3f2fd;
+  border-left: 4px solid #007bff;
+}
+
+.waba-item:last-child {
+  border-bottom: none;
+}
+
+.waba-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.waba-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-approved {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-unknown {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.waba-details {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.waba-details p {
+  margin: 5px 0;
+}
+
+.waba-details strong {
+  color: #495057;
+}
+
+.loading, .error, .no-wabas {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading p {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.loading-details {
+  font-size: 0.9rem !important;
+  color: #adb5bd !important;
+  font-weight: normal !important;
+}
+
+.error {
+  color: #dc3545;
+}
+
+.no-wabas {
+  font-style: italic;
+} 

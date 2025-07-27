@@ -1,0 +1,59 @@
+.waba-manager {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.waba-manager-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.waba-manager-header h1 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 2rem;
+}
+
+.waba-manager-header p {
+  color: #6c757d;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.waba-manager-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.waba-list-section {
+  min-height: 500px;
+}
+
+.waba-phone-numbers-section {
+  min-height: 500px;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 1024px) {
+  .waba-manager-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .waba-manager {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .waba-manager-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .waba-manager-header p {
+    font-size: 1rem;
+  }
+} 

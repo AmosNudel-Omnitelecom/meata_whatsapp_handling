@@ -37,7 +37,6 @@ async def get_phone_numbers():
             
         # Facebook Graph API endpoint - use preverified_numbers endpoint
         url = f"https://graph.facebook.com/v18.0/{business_portfolio_id}/preverified_numbers"
-        print(url)
         
         
         if not ACCESS_TOKEN:
@@ -48,12 +47,9 @@ async def get_phone_numbers():
             "access_token": ACCESS_TOKEN,
             "fields": "id,phone_number,code_verification_status,verification_expiry_time"
         }
-        print(params)
         
         # Make the request to Facebook Graph API
         response = requests.get(url, params=params)
-        print(f"Response status: {response.status_code}")
-        print(f"Response text: {response.text}")
         
         if response.status_code != 200:
             return {
@@ -79,20 +75,14 @@ async def get_wabas():
         
         # Facebook Graph API endpoint for owned WhatsApp Business Accounts
         url = f"https://graph.facebook.com/v18.0/{business_portfolio_id}/owned_whatsapp_business_accounts"
-        print(f"📱 Getting owned WABAs for business portfolio: {business_portfolio_id}")
-        print(f"URL: {url}")
         
         # Add access token to request parameters
         params = {
             "access_token": ACCESS_TOKEN
         }
         
-        print(f"Request params: {params}")
-        
         # Make the request to Facebook Graph API
         response = requests.get(url, params=params)
-        print(f"Response status: {response.status_code}")
-        print(f"Response text: {response.text}")
         
         if response.status_code != 200:
             return {
@@ -102,7 +92,6 @@ async def get_wabas():
             }
             
         owned_data = response.json()
-        print(f"📱 Owned WABAs response: {owned_data}")
         return owned_data
         
     except Exception as e:
@@ -120,8 +109,6 @@ async def get_client_wabas():
         
         # Facebook Graph API endpoint for client WhatsApp Business Accounts
         url = f"https://graph.facebook.com/v18.0/{business_portfolio_id}/client_whatsapp_business_accounts"
-        print(f"📱 Getting client WABAs for business portfolio: {business_portfolio_id}")
-        print(f"URL: {url}")
         
         # Add access token and filtering to request parameters
         params = {
@@ -129,12 +116,8 @@ async def get_client_wabas():
             "filtering": f'[{{"field":"partners","operator":"ALL","value":["{business_portfolio_id}"]}}]'
         }
         
-        print(f"Request params: {params}")
-        
         # Make the request to Facebook Graph API
         response = requests.get(url, params=params)
-        print(f"Response status: {response.status_code}")
-        print(f"Response text: {response.text}")
         
         if response.status_code != 200:
             return {
@@ -144,7 +127,6 @@ async def get_client_wabas():
             }
             
         client_data = response.json()
-        print(f"📱 Client WABAs response: {client_data}")
         return client_data
         
     except Exception as e:
@@ -158,20 +140,14 @@ async def get_waba_phone_numbers(waba_id: str):
         
         # Facebook Graph API endpoint for WABA phone numbers
         url = f"https://graph.facebook.com/v18.0/{waba_id}/phone_numbers"
-        print(f"📱 Getting phone numbers for WABA: {waba_id}")
-        print(f"URL: {url}")
         
         # Add access token to request parameters
         params = {
             "access_token": ACCESS_TOKEN
         }
         
-        print(f"Request params: {params}")
-        
         # Make the request to Facebook Graph API
         response = requests.get(url, params=params)
-        print(f"Response status: {response.status_code}")
-        print(f"Response text: {response.text}")
         
         if response.status_code != 200:
             return {
@@ -181,7 +157,12 @@ async def get_waba_phone_numbers(waba_id: str):
             }
             
         data = response.json()
-        print(f"📱 WABA phone numbers response: {data}")
+        
+        # Print all available fields
+        if data.get('data') and len(data['data']) > 0:
+            first_phone = data['data'][0]
+            print(f"Available fields: {list(first_phone.keys())}")
+        
         return data
         
     except Exception as e:
@@ -199,8 +180,6 @@ async def add_phone_number(phone_number: str):
         
         # Facebook Graph API endpoint for adding phone numbers
         url = f"https://graph.facebook.com/v18.0/{business_portfolio_id}/add_phone_numbers"
-        print(f"Adding phone number: {phone_number}")
-        print(f"URL: {url}")
         
         # Prepare the request data
         data = {
@@ -212,13 +191,8 @@ async def add_phone_number(phone_number: str):
             "access_token": ACCESS_TOKEN
         }
         
-        print(f"Request data: {data}")
-        print(f"Request params: {params}")
-        
         # Make the POST request to Facebook Graph API
         response = requests.post(url, json=data, params=params)
-        print(f"Response status: {response.status_code}")
-        print(f"Response text: {response.text}")
         
         if response.status_code != 200:
             return {
@@ -240,20 +214,14 @@ async def delete_phone_number(number_id: str):
         
         # Facebook Graph API endpoint for deleting phone numbers
         url = f"https://graph.facebook.com/v18.0/{number_id}"
-        print(f"Deleting phone number with ID: {number_id}")
-        print(f"URL: {url}")
         
         # Add access token to request parameters
         params = {
             "access_token": ACCESS_TOKEN
         }
         
-        print(f"Request params: {params}")
-        
         # Make the DELETE request to Facebook Graph API
         response = requests.delete(url, params=params)
-        print(f"Response status: {response.status_code}")
-        print(f"Response text: {response.text}")
         
         if response.status_code != 200:
             return {
@@ -275,8 +243,6 @@ async def request_verification_code(number_id: str):
         
         # Facebook Graph API endpoint for requesting verification code
         url = f"https://graph.facebook.com/v18.0/{number_id}/request_code"
-        print(f"🔐 Requesting verification code for number ID: {number_id}")
-        print(f"URL: {url}")
         
         # Add access token and required parameters
         params = {
@@ -285,12 +251,8 @@ async def request_verification_code(number_id: str):
             "language": "en_US"
         }
         
-        print(f"Request params: {params}")
-        
         # Make the POST request to Facebook Graph API
         response = requests.post(url, params=params)
-        print(f"Response status: {response.status_code}")
-        print(f"Response text: {response.text}")
         
         if response.status_code != 200:
             return {
@@ -312,9 +274,6 @@ async def verify_code(number_id: str, code: str):
         
         # Facebook Graph API endpoint for verifying code
         url = f"https://graph.facebook.com/v18.0/{number_id}/verify_code"
-        print(f"🔐 Verifying code for number ID: {number_id}")
-        print(f"🔐 Code being verified: {code}")
-        print(f"URL: {url}")
         
         # Add access token and verification code
         params = {
@@ -322,12 +281,8 @@ async def verify_code(number_id: str, code: str):
             "code": code
         }
         
-        print(f"Request params: {params}")
-        
         # Make the POST request to Facebook Graph API
         response = requests.post(url, params=params)
-        print(f"Response status: {response.status_code}")
-        print(f"Response text: {response.text}")
         
         if response.status_code != 200:
             return {
@@ -349,27 +304,20 @@ async def register_phone_number(waba_phone_number_id: str, pin: str):
         
         # Facebook Graph API endpoint for registering phone number
         url = f"https://graph.facebook.com/v18.0/{waba_phone_number_id}/register"
-        print(f"📤 Registering phone number with ID: {waba_phone_number_id}")
-        print(f"URL: {url}")
         
         # Prepare the request body
         request_body = {
             "messaging_product": "whatsapp",
             "pin": pin
         }
-        print(f"📤 Registration request body: {request_body}")
         
         # Add access token to request parameters
         params = {
             "access_token": ACCESS_TOKEN
         }
         
-        print(f"Request params: {params}")
-        
         # Make the POST request to Facebook Graph API
         response = requests.post(url, json=request_body, params=params)
-        print(f"Response status: {response.status_code}")
-        print(f"Response text: {response.text}")
         
         if response.status_code != 200:
             return {
@@ -383,6 +331,8 @@ async def register_phone_number(waba_phone_number_id: str, pin: str):
     except Exception as e:
         return {"error": f"Failed to register phone number: {str(e)}"}
 
+
+# not being used
 @app.post("/deregister-phone-number/{number_id}")
 async def deregister_phone_number(number_id: str):
     try:
@@ -391,20 +341,14 @@ async def deregister_phone_number(number_id: str):
         
         # Facebook Graph API endpoint for deregistering phone number
         url = f"https://graph.facebook.com/v18.0/{number_id}/deregister"
-        print(f"Deregistering phone number with ID: {number_id}")
-        print(f"URL: {url}")
         
         # Add access token to request parameters
         params = {
             "access_token": ACCESS_TOKEN
         }
         
-        print(f"Request params: {params}")
-        
         # Make the POST request to Facebook Graph API
         response = requests.post(url, params=params)
-        print(f"Response status: {response.status_code}")
-        print(f"Response text: {response.text}")
         
         if response.status_code != 200:
             return {

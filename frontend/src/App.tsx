@@ -4,6 +4,7 @@ import { store } from './store/store';
 import PhoneNumbers from './components/PhoneNumbers';
 import AddPhoneNumber from './components/AddPhoneNumber';
 import FacebookSignup from './components/FacebookSignup';
+import WABAManager from './components/WABAManager';
 import './App.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <FacebookSignup />
           <AddPhoneNumber />
           <PhoneNumbers />
+          <WABAManager />
         </main>
       </div>
     </Provider>
