@@ -4,6 +4,7 @@ import './FacebookSignup.css';
 
 interface FacebookSignupProps {
   setupConfig?: any;
+  newlyAddedPhoneId?: string | null;
 }
 
 
@@ -24,7 +25,8 @@ declare global {
 }
 
 const FacebookSignup: React.FC<FacebookSignupProps> = ({
-  setupConfig
+  setupConfig,
+  newlyAddedPhoneId
 }) => {
   // Get Facebook credentials from environment variables
   const facebookAppId = process.env.REACT_APP_FACEBOOK_APP_ID;
@@ -42,6 +44,12 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [selectedNumbers, setSelectedNumbers] = useState<string[]>([]);
   const scriptRef = useRef<HTMLScriptElement | null>(null);
+  
+  // Search functionality
+  const [searchPhoneNumber, setSearchPhoneNumber] = useState<string>('');
+  const [searchId, setSearchId] = useState<string>('');
+  const [searchedPhoneId, setSearchedPhoneId] = useState<string | null>(null);
+  const [showAllNumbers, setShowAllNumbers] = useState<boolean>(false);
   
   // Get phone numbers from Redux store
   const { data: phoneNumbersData, isLoading: isLoadingNumbers } = useGetPhoneNumbersQuery();
@@ -225,6 +233,56 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
     setSelectedNumbers(prev => prev.filter(id => id !== numberId));
   };
 
+  // Search functionality
+  const handleSearchByPhoneNumber = () => {
+    if (!searchPhoneNumber.trim() || !phoneNumbersData?.data) return;
+    
+    const foundPhone = phoneNumbersData.data.find(phone => 
+      phone.phone_number.includes(searchPhoneNumber.trim())
+    );
+    
+    if (foundPhone) {
+      setSearchedPhoneId(foundPhone.id);
+      setSearchId(''); // Clear ID search
+    } else {
+      alert('Phone number not found');
+    }
+  };
+
+  const handleSearchById = () => {
+    if (!searchId.trim() || !phoneNumbersData?.data) return;
+    
+    const foundPhone = phoneNumbersData.data.find(phone => 
+      phone.id === searchId.trim()
+    );
+    
+    if (foundPhone) {
+      setSearchedPhoneId(foundPhone.id);
+      setSearchPhoneNumber(''); // Clear phone number search
+    } else {
+      alert('Phone number ID not found');
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchedPhoneId(null);
+    setSearchPhoneNumber('');
+    setSearchId('');
+  };
+
+  // Determine which phone ID to display (newly created takes priority, then searched)
+  const displayPhoneId = newlyAddedPhoneId || searchedPhoneId;
+
+  // Function to handle showing all numbers (doesn't clear localStorage)
+  const handleShowAllNumbers = () => {
+    setShowAllNumbers(true);
+  };
+
+  // Function to return to showing the stored phone number
+  const handleShowStoredNumber = () => {
+    setShowAllNumbers(false);
+  };
+
 
 
   return (
@@ -259,7 +317,27 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
 
         {/* Phone Number Selection */}
         <div className="phone-selection-section">
-          <h3>Select Phone Numbers for Embedded Signup</h3>
+          <div className="section-header">
+            <h3>Select Phone Numbers for Embedded Signup</h3>
+            {!showAllNumbers && (
+              <button 
+                onClick={handleShowAllNumbers} 
+                className="clear-stored-button"
+                title="Show all verified numbers"
+              >
+                Show All Numbers
+              </button>
+            )}
+            {showAllNumbers && (
+              <button 
+                onClick={handleShowStoredNumber} 
+                className="clear-stored-button"
+                title="Show stored phone number"
+              >
+                Show Stored Number
+              </button>
+            )}
+          </div>
           
           <div className="info-box">
             <p>
@@ -267,43 +345,142 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
               Only verified phone numbers can be included in the embedded signup flow. Click "Add to Signup" to include numbers in your configuration.
             </p>
           </div>
+
+          {/* Search Section */}
+          <div className="search-section">
+            <div className="search-row">
+              <div className="search-group">
+                <input
+                  type="text"
+                  placeholder="Search by phone number..."
+                  value={searchPhoneNumber}
+                  onChange={(e) => setSearchPhoneNumber(e.target.value)}
+                  className="search-input"
+                />
+                <button 
+                  onClick={handleSearchByPhoneNumber}
+                  className="search-button"
+                  disabled={!searchPhoneNumber.trim()}
+                >
+                  Search
+                </button>
+              </div>
+              
+              <div className="search-group">
+                <input
+                  type="text"
+                  placeholder="Search by ID..."
+                  value={searchId}
+                  onChange={(e) => setSearchId(e.target.value)}
+                  className="search-input"
+                />
+                <button 
+                  onClick={handleSearchById}
+                  className="search-button"
+                  disabled={!searchId.trim()}
+                >
+                  Search
+                </button>
+              </div>
+              
+              {(searchedPhoneId || searchPhoneNumber || searchId) && (
+                <button 
+                  onClick={handleClearSearch}
+                  className="clear-search-button"
+                >
+                  Clear Search
+                </button>
+              )}
+            </div>
+          </div>
           
           {isLoadingNumbers ? (
             <div className="loading-message">Loading phone numbers...</div>
           ) : (
             <div className="phone-numbers-list">
               <h4>Available Verified Numbers:</h4>
-              {phoneNumbersData?.data?.filter(n => n.code_verification_status === 'VERIFIED').map(number => (
-                <div key={number.id} className="phone-number-item">
-                  <div className="phone-info">
-                    <span className="phone-number">{number.phone_number}</span>
-                    <div className="phone-id">ID: {number.id}</div>
-                  </div>
-                  <div className="phone-actions">
-                    <span className="status-badge verified">
-                      <span className="status-icon">✓</span>Verified
-                    </span>
-                    {selectedNumbers.includes(number.id) ? (
-                      <button
-                        onClick={() => removeNumberFromSignup(number.id)}
-                        className="remove-button"
-                      >
-                        <span className="button-icon">−</span>Remove
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => addNumberToSignup(number.id)}
-                        className="add-button"
-                      >
-                        <span className="button-icon">+</span>Add to Signup
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
               
-              {phoneNumbersData?.data?.filter(n => n.code_verification_status === 'VERIFIED').length === 0 && (
-                <p className="no-numbers">No verified numbers available</p>
+              {/* Show only the specific phone number if one is selected and not showing all numbers */}
+              {!showAllNumbers && displayPhoneId && phoneNumbersData?.data ? (
+                (() => {
+                  const phoneNumber = phoneNumbersData.data.find(p => p.id === displayPhoneId);
+                  if (!phoneNumber) {
+                    return <p className="no-numbers">Phone number not found.</p>;
+                  }
+                  
+                  if (phoneNumber.code_verification_status !== 'VERIFIED') {
+                    return <p className="no-numbers">Selected phone number is not verified.</p>;
+                  }
+                  
+                  return (
+                    <div key={phoneNumber.id} className="phone-number-item">
+                      <div className="phone-info">
+                        <span className="phone-number">{phoneNumber.phone_number}</span>
+                        <div className="phone-id">ID: {phoneNumber.id}</div>
+                      </div>
+                      <div className="phone-actions">
+                        <span className="status-badge verified">
+                          <span className="status-icon">✓</span>Verified
+                        </span>
+                        {selectedNumbers.includes(phoneNumber.id) ? (
+                          <button
+                            onClick={() => removeNumberFromSignup(phoneNumber.id)}
+                            className="remove-button"
+                          >
+                            <span className="button-icon">−</span>Remove
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => addNumberToSignup(phoneNumber.id)}
+                            className="add-button"
+                          >
+                            <span className="button-icon">+</span>Add to Signup
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()
+              ) : (
+                // Show all verified numbers only when showAllNumbers is explicitly true
+                <>
+                  {showAllNumbers && phoneNumbersData?.data?.filter(n => n.code_verification_status === 'VERIFIED').map(number => (
+                    <div key={number.id} className="phone-number-item">
+                      <div className="phone-info">
+                        <span className="phone-number">{number.phone_number}</span>
+                        <div className="phone-id">ID: {number.id}</div>
+                      </div>
+                      <div className="phone-actions">
+                        <span className="status-badge verified">
+                          <span className="status-icon">✓</span>Verified
+                        </span>
+                        {selectedNumbers.includes(number.id) ? (
+                          <button
+                            onClick={() => removeNumberFromSignup(number.id)}
+                            className="remove-button"
+                          >
+                            <span className="button-icon">−</span>Remove
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => addNumberToSignup(number.id)}
+                            className="add-button"
+                          >
+                            <span className="button-icon">+</span>Add to Signup
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {showAllNumbers && phoneNumbersData?.data?.filter(n => n.code_verification_status === 'VERIFIED').length === 0 && (
+                    <p className="no-numbers">No verified numbers available. Add and verify a phone number in the Phone Numbers tab first.</p>
+                  )}
+                  
+                  {!showAllNumbers && (
+                    <p className="no-numbers">Click "Show All Numbers" to see available verified phone numbers, or use the search above to find a specific number.</p>
+                  )}
+                </>
               )}
             </div>
           )}

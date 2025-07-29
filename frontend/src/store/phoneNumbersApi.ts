@@ -34,7 +34,7 @@ export const phoneNumbersApi = createApi({
       }),
       invalidatesTags: ['PhoneNumbers'],
     }),
-    addPhoneNumber: builder.mutation<void, string>({
+    addPhoneNumber: builder.mutation<{ id: string }, string>({
       query: (phoneNumber) => ({
         url: 'add-phone-number',
         method: 'POST',

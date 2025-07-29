@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { useAddPhoneNumberMutation } from '../store/phoneNumbersApi';
 import './AddPhoneNumber.css';
 
-const AddPhoneNumber: React.FC = () => {
+interface AddPhoneNumberProps {
+  onPhoneNumberAdded?: (phoneNumberId: string) => void;
+}
+
+const AddPhoneNumber: React.FC<AddPhoneNumberProps> = ({ onPhoneNumberAdded }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [addPhoneNumber, { isLoading }] = useAddPhoneNumberMutation();
   const [showForm, setShowForm] = useState(false);
@@ -23,10 +27,15 @@ const AddPhoneNumber: React.FC = () => {
     }
 
     try {
-      await addPhoneNumber(phoneNumber.trim()).unwrap();
+      const result = await addPhoneNumber(phoneNumber.trim()).unwrap();
       alert('Phone number added successfully!');
       setPhoneNumber('');
       setShowForm(false);
+      
+      // Call the callback with the new phone number ID
+      if (onPhoneNumberAdded && result.id) {
+        onPhoneNumberAdded(result.id);
+      }
     } catch (error) {
       console.error('Failed to add phone number:', error);
       alert('Failed to add phone number. Please try again.');

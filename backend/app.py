@@ -1,6 +1,7 @@
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import requests
 import os
 from dotenv import load_dotenv
@@ -22,10 +23,23 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+# Pydantic model for request body
+class PhoneNumberRequest(BaseModel):
+    phone_number: str
+
 
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+@app.get("/test")
+async def test():
+    return {"message": "Backend is running", "status": "ok"}
+
+@app.post("/test-post")
+async def test_post(request: PhoneNumberRequest):
+    print(f"Test POST received: {request.phone_number}")
+    return {"message": "Test POST successful", "phone_number": request.phone_number}
 
 @app.get("/phone-numbers")
 async def get_phone_numbers():
@@ -169,22 +183,32 @@ async def get_waba_phone_numbers(waba_id: str):
         return {"error": f"Failed to retrieve WABA phone numbers: {str(e)}"}
 
 @app.post("/add-phone-number")
-async def add_phone_number(phone_number: str):
+async def add_phone_number(request: PhoneNumberRequest):
     try:
+        print(f"\n=== Add Phone Number Endpoint Called ===")
+        print(f"Request received: {request}")
+        phone_number = request.phone_number
+        print(f"Phone number extracted: {phone_number}")
+        print(f"=== Adding Phone Number: {phone_number} ===")
+        
         # Use business portfolio ID from environment variables
         if not business_portfolio_id:
+            print("BUSINESS_PORTFOLIO_ID not found in environment variables")
             return {"error": "BUSINESS_PORTFOLIO_ID not found in environment variables"}
             
         if not ACCESS_TOKEN:
+            print("ACCESS_TOKEN not found in environment variables")
             return {"error": "ACCESS_TOKEN not found in environment variables"}
         
         # Facebook Graph API endpoint for adding phone numbers
         url = f"https://graph.facebook.com/v18.0/{business_portfolio_id}/add_phone_numbers"
+        print(f"Calling Facebook API: {url}")
         
         # Prepare the request data
         data = {
             "phone_number": phone_number
         }
+        print(f"Request data: {data}")
         
         # Add access token to request parameters
         params = {
@@ -194,16 +218,27 @@ async def add_phone_number(phone_number: str):
         # Make the POST request to Facebook Graph API
         response = requests.post(url, json=data, params=params)
         
+        print(f"Response Status Code: {response.status_code}")
+        print(f"Response Headers: {dict(response.headers)}")
+        print(f"Response Body: {response.text}")
+        
         if response.status_code != 200:
+            print(f"Error: Facebook API returned status {response.status_code}")
             return {
                 "error": f"Facebook API error: {response.status_code}",
                 "details": response.text,
                 "url": url
             }
+        
+        response_data = response.json()
+        print(f"Success: Phone number added successfully")
+        print(f"Response data: {response_data}")
+        print("=" * 50)
             
-        return response.json()
+        return response_data
         
     except Exception as e:
+        print(f"Exception occurred: {str(e)}")
         return {"error": f"Failed to add phone number: {str(e)}"}
 
 @app.delete("/delete-phone-number/{number_id}")
@@ -238,11 +273,33 @@ async def delete_phone_number(number_id: str):
 @app.post("/request-verification-code/{number_id}")
 async def request_verification_code(number_id: str):
     try:
+        print(f"\n=== Requesting Verification Code for Phone Number ID: {number_id} ===")
+        
         if not ACCESS_TOKEN:
+            print("ACCESS_TOKEN not found in environment variables")
             return {"error": "ACCESS_TOKEN not found in environment variables"}
+        
+        # First, get the phone number details to show which number we're sending SMS to
+        phone_details_url = f"https://graph.facebook.com/v18.0/{number_id}"
+        phone_params = {
+            "access_token": ACCESS_TOKEN,
+            "fields": "phone_number,code_verification_status"
+        }
+        
+        print(f"Getting phone number details from: {phone_details_url}")
+        phone_response = requests.get(phone_details_url, params=phone_params)
+        
+        if phone_response.status_code == 200:
+            phone_data = phone_response.json()
+            print(f"Phone Number Details: {phone_data}")
+            print(f"SMS will be sent to: {phone_data.get('phone_number', 'Unknown')}")
+            print(f"Current verification status: {phone_data.get('code_verification_status', 'Unknown')}")
+        else:
+            print(f"Failed to get phone number details: {phone_response.status_code}")
         
         # Facebook Graph API endpoint for requesting verification code
         url = f"https://graph.facebook.com/v18.0/{number_id}/request_code"
+        print(f"Calling Facebook API: {url}")
         
         # Add access token and required parameters
         params = {
@@ -250,50 +307,84 @@ async def request_verification_code(number_id: str):
             "code_method": "SMS",
             "language": "en_US"
         }
+        print(f"Request parameters: {params}")
         
         # Make the POST request to Facebook Graph API
         response = requests.post(url, params=params)
         
+        print(f"Response Status Code: {response.status_code}")
+        print(f"Response Headers: {dict(response.headers)}")
+        print(f"Response Body: {response.text}")
+        
         if response.status_code != 200:
+            print(f"Error: Facebook API returned status {response.status_code}")
             return {
                 "error": f"Facebook API error: {response.status_code}",
                 "details": response.text,
                 "url": url
             }
+        
+        response_data = response.json()
+        print(f"Success: Verification code requested successfully")
+        print(f"Response data: {response_data}")
+        print("=" * 50)
             
-        return response.json()
+        return response_data
         
     except Exception as e:
+        print(f"Exception occurred: {str(e)}")
         return {"error": f"Failed to request verification code: {str(e)}"}
 
 @app.post("/verify-code/{number_id}")
 async def verify_code(number_id: str, code: str):
     try:
+        print(f"\n=== Verifying Code for Phone Number ID: {number_id} ===")
+        print(f"Verification Code: {code}")
+        
         if not ACCESS_TOKEN:
+            print("ACCESS_TOKEN not found in environment variables")
             return {"error": "ACCESS_TOKEN not found in environment variables"}
         
         # Facebook Graph API endpoint for verifying code
         url = f"https://graph.facebook.com/v18.0/{number_id}/verify_code"
+        print(f"Calling Facebook API: {url}")
         
         # Add access token and verification code
         params = {
             "access_token": ACCESS_TOKEN,
             "code": code
         }
+        print(f"Request parameters: {params}")
         
         # Make the POST request to Facebook Graph API
         response = requests.post(url, params=params)
         
+        print(f"Response Status Code: {response.status_code}")
+        print(f"Response Headers: {dict(response.headers)}")
+        print(f"Response Body: {response.text}")
+        
         if response.status_code != 200:
-            return {
+            print(f"Error: Facebook API returned status {response.status_code}")
+            error_response = {
                 "error": f"Facebook API error: {response.status_code}",
                 "details": response.text,
                 "url": url
             }
-            
-        return response.json()
+            # Return the error with the same status code from Facebook
+            raise HTTPException(status_code=response.status_code, detail=error_response)
         
+        response_data = response.json()
+        print(f"Success: Code verified successfully")
+        print(f"Response data: {response_data}")
+        print("=" * 50)
+            
+        return response_data
+        
+    except HTTPException:
+        # Re-raise HTTPExceptions so they propagate properly
+        raise
     except Exception as e:
+        print(f"Exception occurred: {str(e)}")
         return {"error": f"Failed to verify code: {str(e)}"}
 
 @app.post("/register-phone-number/{waba_phone_number_id}")

@@ -14,6 +14,12 @@
   border-bottom: 2px solid #e1e5e9;
 }
 
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .header h2 {
   margin: 0;
   color: #2c3e50;
@@ -35,6 +41,22 @@
 
 .refresh-button:hover {
   background: #2980b9;
+}
+
+.clear-stored-button {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.clear-stored-button:hover {
+  background: #7f8c8d;
 }
 
 .loading {
@@ -102,6 +124,28 @@
   font-family: 'Courier New', monospace;
   background: #f8f9fa;
   padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.newly-added-badge {
+  margin: 4px 0;
+  font-size: 12px;
+  color: #28a745;
+  font-weight: 600;
+  background: #d4edda;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.searched-badge {
+  margin: 4px 0;
+  font-size: 12px;
+  color: #007bff;
+  font-weight: 600;
+  background: #d1ecf1;
+  padding: 2px 8px;
   border-radius: 4px;
   display: inline-block;
 }
@@ -274,5 +318,100 @@
   .phone-numbers-list {
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 20px;
+  }
+}
+
+/* Search Section Styles */
+.search-section {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.search-row {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 1;
+  min-width: 250px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.search-button {
+  padding: 10px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.search-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.search-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.clear-search-button {
+  padding: 10px 16px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.clear-search-button:hover {
+  background-color: #545b62;
+}
+
+/* Responsive design for search */
+@media (max-width: 768px) {
+  .search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-group {
+    min-width: auto;
+  }
+  
+  .clear-search-button {
+    align-self: flex-start;
   }
 } 
