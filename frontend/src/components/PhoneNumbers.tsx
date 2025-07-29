@@ -19,7 +19,7 @@ const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
   const [requestingCodeId, setRequestingCodeId] = useState<string | null>(null);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
   const [verificationCodes, setVerificationCodes] = useState<{ [key: string]: string }>({});
-  const [showVerificationInput, setShowVerificationInput] = useState<{ [key: string]: boolean }>({});
+
   const [searchPhoneNumber, setSearchPhoneNumber] = useState<string>('');
   const [searchId, setSearchId] = useState<string>('');
   const [searchedPhoneId, setSearchedPhoneId] = useState<string | null>(null);
@@ -49,8 +49,7 @@ const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
     try {
       await requestVerificationCode(numberId).unwrap();
       alert('Verification code has been sent successfully!');
-      // Show verification input field for this number
-      setShowVerificationInput(prev => ({ ...prev, [numberId]: true }));
+      // Verification code requested successfully
     } catch (error) {
       console.error('Failed to request verification code:', error);
       alert('Failed to request verification code. Please try again.');
@@ -72,8 +71,7 @@ const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
       const result = await verifyCode({ numberId, code }).unwrap();
       console.log('Verification result:', result);
       alert('Code verified successfully!');
-      // Hide verification input and clear code
-      setShowVerificationInput(prev => ({ ...prev, [numberId]: false }));
+      // Clear verification code
       setVerificationCodes(prev => ({ ...prev, [numberId]: '' }));
     } catch (error) {
       console.error('Failed to verify code - Error details:', error);
@@ -132,8 +130,7 @@ const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
     setSearchId('');
   };
 
-  // Determine which phone ID to display (newly added takes priority, then searched)
-  const displayPhoneId = newlyAddedPhoneId || searchedPhoneId;
+
 
   if (isLoading) {
     return (

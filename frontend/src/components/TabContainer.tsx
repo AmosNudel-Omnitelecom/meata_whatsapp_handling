@@ -33,9 +33,7 @@ const TabContainer: React.FC = () => {
     }
   };
 
-  const handleClearStoredPhoneNumber = () => {
-    setNewlyAddedPhoneId(null);
-  };
+
 
   const tabs = [
     { id: 0, label: 'Phone Numbers', component: 'phone-numbers' },
