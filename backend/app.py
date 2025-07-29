@@ -331,6 +331,93 @@ async def register_phone_number(waba_phone_number_id: str, pin: str):
     except Exception as e:
         return {"error": f"Failed to register phone number: {str(e)}"}
 
+@app.post("/subscribe-webhooks/{waba_id}")
+async def subscribe_webhooks(waba_id: str):
+    try:
+        if not ACCESS_TOKEN:
+            return {"error": "ACCESS_TOKEN not found in environment variables"}
+        
+        # Facebook Graph API endpoint for subscribing to webhooks
+        url = f"https://graph.facebook.com/v18.0/{waba_id}/subscribed_apps"
+        
+        # Add access token to request parameters
+        params = {
+            "access_token": ACCESS_TOKEN
+        }
+        
+        # Make the POST request to Facebook Graph API
+        response = requests.post(url, params=params)
+        
+        # Print response for testing
+        print(f"Subscribe webhooks response for WABA {waba_id}:")
+        print(f"Status Code: {response.status_code}")
+        print(f"Response Headers: {dict(response.headers)}")
+        print(f"Response Body: {response.text}")
+        
+        if response.status_code != 200:
+            return {
+                "error": f"Facebook API error: {response.status_code}",
+                "details": response.text,
+                "url": url
+            }
+            
+        return response.json()
+        
+    except Exception as e:
+        return {"error": f"Failed to subscribe to webhooks: {str(e)}"}
+
+@app.get("/waba-subscriptions/{waba_id}")
+async def get_waba_subscriptions(waba_id: str):
+    try:
+        print(f"GET /waba-subscriptions/{waba_id} called")
+        
+        if not ACCESS_TOKEN:
+            print("ACCESS_TOKEN not found in environment variables")
+            return {"error": "ACCESS_TOKEN not found in environment variables"}
+        
+        # Facebook Graph API endpoint for getting WABA subscriptions
+        url = f"https://graph.facebook.com/v18.0/{waba_id}/subscribed_apps"
+        print(f"Calling Facebook API: {url}")
+        
+        # Add access token to request parameters
+        params = {
+            "access_token": ACCESS_TOKEN
+        }
+        
+        # Make the GET request to Facebook Graph API
+        response = requests.get(url, params=params)
+        
+        print(f"Facebook API response status: {response.status_code}")
+        print(f"Facebook API response body: {response.text}")
+        
+        if response.status_code != 200:
+            return {
+                "error": f"Facebook API error: {response.status_code}",
+                "details": response.text,
+                "url": url
+            }
+        
+        # Parse and print subscription details
+        response_data = response.json()
+        print(f"\n=== WABA {waba_id} Subscription Details ===")
+        if response_data.get('data') and len(response_data['data']) > 0:
+            print(f"Number of subscribed apps: {len(response_data['data'])}")
+            for i, app in enumerate(response_data['data'], 1):
+                app_data = app.get('whatsapp_business_api_data', {})
+                print(f"App {i}:")
+                print(f"  - ID: {app_data.get('id', 'N/A')}")
+                print(f"  - Name: {app_data.get('name', 'N/A')}")
+                print(f"  - Link: {app_data.get('link', 'N/A')}")
+        else:
+            print("No subscribed apps found")
+        print("=" * 50)
+            
+        return response_data
+        
+    except Exception as e:
+        print(f"Exception in get_waba_subscriptions: {str(e)}")
+        return {"error": f"Failed to retrieve WABA subscriptions: {str(e)}"}
+
 
 # not being used
 @app.post("/deregister-phone-number/{number_id}")
