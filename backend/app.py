@@ -42,6 +42,15 @@ class WabaRequest(BaseModel):
     code: str
     waba_id: str
 
+class RegisterPhoneRequest(BaseModel):
+    pin: str
+    
+    def __init__(self, **data):
+        super().__init__(**data)
+        # Validate PIN format
+        if not self.pin or len(self.pin) != 6 or not self.pin.isdigit():
+            raise ValueError("PIN must be exactly 6 digits")
+
 
 @app.get("/")
 async def root():
@@ -434,53 +443,88 @@ async def verify_code(number_id: str, code: str):
         return {"error": f"Failed to verify code: {str(e)}"}
 
 @app.post("/register-phone-number/{waba_phone_number_id}")
-async def register_phone_number(waba_phone_number_id: str, pin: str, db: Session = Depends(get_db)):
+async def register_phone_number(waba_phone_number_id: str, request: RegisterPhoneRequest, db: Session = Depends(get_db)):
     try:
+        print(f"\n=== Register Phone Number Endpoint Called ===")
+        print(f"WABA Phone Number ID: {waba_phone_number_id}")
+        print(f"PIN: {request.pin}")
+        print(f"PIN type: {type(request.pin)}")
+        print(f"PIN length: {len(request.pin) if request.pin else 0}")
+        
         # Try to find the WABA ID for this phone number from our database
         phone_record = db.query(WabaPhoneNumber).filter(
             WabaPhoneNumber.phone_number_id == waba_phone_number_id
         ).first()
+        
+        print(f"Phone record found in database: {phone_record is not None}")
+        if phone_record:
+            print(f"Phone record details: ID={phone_record.phone_number_id}, WABA={phone_record.waba_id}")
         
         if phone_record:
             # We found the WABA, try to use its business token
             waba_data = db.query(WabaData).filter(WabaData.waba_id == phone_record.waba_id).first()
             access_token = waba_data.access_token if waba_data else ACCESS_TOKEN
             print(f"Using business token for WABA {phone_record.waba_id} to register phone {waba_phone_number_id}")
+            print(f"WABA data found: {waba_data is not None}")
         else:
             # Fall back to global token
             access_token = ACCESS_TOKEN
             print(f"Phone number {waba_phone_number_id} not found in database, using global token")
         
+        print(f"Access token available: {access_token is not None}")
+        print(f"Access token length: {len(access_token) if access_token else 0}")
+        
         if not access_token:
+            print("ERROR: ACCESS_TOKEN not found in environment variables")
             return {"error": "ACCESS_TOKEN not found in environment variables"}
         
         # Facebook Graph API endpoint for registering phone number
         url = f"https://graph.facebook.com/v18.0/{waba_phone_number_id}/register"
+        print(f"Calling Facebook API: {url}")
         
         # Prepare the request body
         request_body = {
             "messaging_product": "whatsapp",
-            "pin": pin
+            "pin": request.pin
         }
+        print(f"Request body: {request_body}")
         
         # Add access token to request parameters
         params = {
             "access_token": access_token
         }
+        print(f"Request parameters: {params}")
         
         # Make the POST request to Facebook Graph API
+        print(f"Making POST request to Facebook API...")
         response = requests.post(url, json=request_body, params=params)
         
+        print(f"Response Status Code: {response.status_code}")
+        print(f"Response Headers: {dict(response.headers)}")
+        print(f"Response Body: {response.text}")
+        
         if response.status_code != 200:
-            return {
+            print(f"ERROR: Facebook API returned status {response.status_code}")
+            error_response = {
                 "error": f"Facebook API error: {response.status_code}",
                 "details": response.text,
                 "url": url
             }
+            print(f"Returning error response: {error_response}")
+            return error_response
+        
+        response_data = response.json()
+        print(f"Success: Phone number registered successfully")
+        print(f"Response data: {response_data}")
+        print("=" * 50)
             
-        return response.json()
+        return response_data
         
     except Exception as e:
+        print(f"EXCEPTION occurred: {str(e)}")
+        print(f"Exception type: {type(e)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
         return {"error": f"Failed to register phone number: {str(e)}"}
 
 @app.post("/subscribe-webhooks/{waba_id}")
