@@ -188,7 +188,7 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
     };
   }, [facebookAppId, authCode]);
 
-  const fbLoginCallback = async (response: any) => {
+  const fbLoginCallback = (response: any) => {
     if (response.authResponse) {
       const code = response.authResponse.code;
       console.log('Facebook login response code:', code);
@@ -199,7 +199,8 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
       
     } else {
       console.log('Facebook login response:', response);
-      setError('Facebook login failed or was cancelled');
+      const errorDetails = response.error || response.errorMessage || response.error_description || 'Unknown error';
+      setError(`Facebook login failed: ${errorDetails}`);
       setIsLoading(false);
     }
   };
@@ -254,7 +255,8 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
         }
       });
     } catch (err) {
-      setError('Failed to start Facebook login');
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(`Failed to start Facebook login: ${errorMessage}`);
       setIsLoading(false);
     }
   };
