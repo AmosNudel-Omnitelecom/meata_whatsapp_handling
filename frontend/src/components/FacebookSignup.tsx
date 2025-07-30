@@ -186,7 +186,7 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
         scriptRef.current.parentNode.removeChild(scriptRef.current);
       }
     };
-  }, [facebookAppId]);
+  }, [facebookAppId, authCode]);
 
   const fbLoginCallback = async (response: any) => {
     if (response.authResponse) {
