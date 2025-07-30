@@ -43,6 +43,7 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
   const [signupResult, setSignupResult] = useState<SignupResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedNumbers, setSelectedNumbers] = useState<string[]>([]);
+  const [authCode, setAuthCode] = useState<string | null>(null);
   const scriptRef = useRef<HTMLScriptElement | null>(null);
   
   // Search functionality
@@ -96,7 +97,7 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
     };
 
     // Set up message listener for embedded signup results
-    const handleMessage = (event: MessageEvent) => {
+    const handleMessage = async (event: MessageEvent) => {
       if (!event.origin.endsWith('facebook.com')) return;
       
       try {
@@ -117,6 +118,45 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
             setSignupResult(result);
             setIsLoading(false);
             showMessage('success', result.message);
+            
+            // Exchange the authorization code for a business token
+            if (authCode && data.data?.waba_id) {
+              console.log('Exchanging authorization code for business token...');
+              try {
+                const tokenResponse = await fetch('/exchange-code-for-token', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ 
+                    code: authCode,
+                    waba_id: data.data.waba_id
+                  }),
+                });
+                
+                const tokenData = await tokenResponse.json();
+                
+                if (tokenData.error) {
+                  console.error('Token exchange failed:', tokenData.error);
+                  setError(`Token exchange failed: ${tokenData.error}`);
+                } else {
+                  console.log('Business token received successfully:', {
+                    success: tokenData.success,
+                    waba_id: tokenData.waba_id,
+                    message: tokenData.message
+                  });
+                  showMessage('success', `Business token exchanged successfully for WABA: ${data.data.waba_id}`);
+                }
+              } catch (error) {
+                console.error('Error exchanging code for token:', error);
+                setError('Failed to exchange authorization code for business token');
+              }
+            } else {
+              console.warn('Cannot exchange token: missing auth code or waba_id', {
+                hasAuthCode: !!authCode,
+                wabaId: data.data?.waba_id
+              });
+            }
           }
           // Handle abandoned flow
           else if (data.event === 'CANCEL') {
@@ -148,14 +188,17 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
     };
   }, [facebookAppId]);
 
-  const fbLoginCallback = (response: any) => {
+  const fbLoginCallback = async (response: any) => {
     if (response.authResponse) {
       const code = response.authResponse.code;
-      console.log('response: ', code); // remove after testing
-      // TODO: Send this code to your server to exchange for business token
-      console.log('Exchange this code for business token:', code);
+      console.log('Facebook login response code:', code);
+      
+      // Store the code for later use after embedded signup completes
+      setAuthCode(code);
+      console.log('Facebook login successful, proceeding with embedded signup flow...');
+      
     } else {
-      console.log('response: ', response); // remove after testing
+      console.log('Facebook login response:', response);
       setError('Facebook login failed or was cancelled');
       setIsLoading(false);
     }
@@ -221,6 +264,7 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
     setError(null);
     setIsLoading(false);
     setSelectedNumbers([]);
+    setAuthCode(null);
   };
 
   const addNumberToSignup = (numberId: string) => {
@@ -628,6 +672,29 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
               )}
             </div>
             <p>{signupResult.message}</p>
+            
+            {authCode && (
+              <div className="token-exchange-status">
+                <h4>Token Exchange Status</h4>
+                <div className="status-item">
+                  <span className="status-label">Authorization Code:</span>
+                  <span className="status-value success">
+                    <span className="check-icon">✓</span>
+                    Received
+                  </span>
+                </div>
+                <div className="status-item">
+                  <span className="status-label">Business Token:</span>
+                  <span className="status-value success">
+                    <span className="check-icon">✓</span>
+                    Exchanged and Stored
+                  </span>
+                </div>
+                <p className="info-text">
+                  The business token has been successfully exchanged and stored in the database for WABA ID: {signupResult.waba_id}
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

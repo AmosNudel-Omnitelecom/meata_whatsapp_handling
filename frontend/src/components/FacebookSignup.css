@@ -720,3 +720,61 @@
     align-self: flex-start;
   }
 }
+
+/* Token Exchange Status Styles */
+.token-exchange-status {
+  background: #e8f5e8;
+  border: 1px solid #c3e6c3;
+  border-radius: 6px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.token-exchange-status h4 {
+  margin: 0 0 12px 0;
+  color: #2d5a2d;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.token-exchange-status h4::before {
+  content: "🔐";
+  font-size: 18px;
+}
+
+.token-exchange-status .status-item {
+  margin-bottom: 8px;
+}
+
+.token-exchange-status .status-item:last-child {
+  margin-bottom: 0;
+}
+
+.token-exchange-status .status-label {
+  font-weight: 500;
+  color: #495057;
+  font-size: 14px;
+}
+
+.token-exchange-status .status-value {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.token-exchange-status .status-value.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.token-exchange-status .info-text {
+  margin: 12px 0 0 0;
+  font-size: 14px;
+  color: #2d5a2d;
+  line-height: 1.4;
+  font-style: italic;
+}
