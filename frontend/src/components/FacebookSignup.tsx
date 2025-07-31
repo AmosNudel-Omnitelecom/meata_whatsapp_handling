@@ -236,10 +236,8 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
     setSignupResult(null);
 
     const setupConfig = {
-      features: ['whatsapp_business_management', 'whatsapp_business_messaging'],
-      sessionInfoVersion: 3,
       preVerifiedPhone: {
-        ids: selectedNumbers
+        ids: selectedNumbers.length > 0 ? [selectedNumbers[0]] : []  // Only use the first selected number
       }
     };
 
@@ -248,10 +246,11 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
         config_id: facebookConfigId,
         response_type: 'code',
         override_default_response_type: true,
+        scope: 'business_management,whatsapp_business_management',
         extras: {
-          setup: setupConfig,
-          featureType: featureType,
-          sessionInfoVersion: '3'
+          feature: 'whatsapp_embedded_signup',
+          version: 2,
+          setup: setupConfig
         }
       });
     } catch (err) {
@@ -270,13 +269,13 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
   };
 
   const addNumberToSignup = (numberId: string) => {
-    if (!selectedNumbers.includes(numberId)) {
-      setSelectedNumbers(prev => [...prev, numberId]);
-    }
+    // Only allow one number to be selected at a time
+    setSelectedNumbers([numberId]);
   };
 
   const removeNumberFromSignup = (numberId: string) => {
-    setSelectedNumbers(prev => prev.filter(id => id !== numberId));
+    // Clear all selected numbers (since only one can be selected)
+    setSelectedNumbers([]);
   };
 
   // Search functionality
@@ -385,12 +384,12 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
             )}
           </div>
           
-          <div className="info-box">
-            <p>
-              <span className="info-icon">ℹ️</span>
-              Only verified phone numbers can be included in the embedded signup flow. Click "Add to Signup" to include numbers in your configuration.
-            </p>
-          </div>
+                     <div className="info-box">
+             <p>
+               <span className="info-icon">ℹ️</span>
+               Select one verified phone number to pre-fill in the embedded signup flow. Only one number can be selected at a time.
+             </p>
+           </div>
 
           {/* Search Section */}
           <div className="search-section">
@@ -468,21 +467,21 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
                         <span className="status-badge verified">
                           <span className="status-icon">✓</span>Verified
                         </span>
-                        {selectedNumbers.includes(phoneNumber.id) ? (
-                          <button
-                            onClick={() => removeNumberFromSignup(phoneNumber.id)}
-                            className="remove-button"
-                          >
-                            <span className="button-icon">−</span>Remove
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => addNumberToSignup(phoneNumber.id)}
-                            className="add-button"
-                          >
-                            <span className="button-icon">+</span>Add to Signup
-                          </button>
-                        )}
+                                                 {selectedNumbers.includes(phoneNumber.id) ? (
+                           <button
+                             onClick={() => removeNumberFromSignup(phoneNumber.id)}
+                             className="remove-button"
+                           >
+                             <span className="button-icon">−</span>Remove
+                           </button>
+                         ) : (
+                           <button
+                             onClick={() => addNumberToSignup(phoneNumber.id)}
+                             className="add-button"
+                           >
+                             <span className="button-icon">✓</span>Select
+                           </button>
+                         )}
                       </div>
                     </div>
                   );
@@ -531,24 +530,24 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
             </div>
           )}
           
-          {selectedNumbers.length > 0 && (
-            <div className="selected-numbers">
-              <h4>
-                <span className="check-icon">✓</span>
-                Selected Numbers for Signup ({selectedNumbers.length})
-              </h4>
-              <div className="selected-list">
-                {selectedNumbers.map(numberId => {
-                  const number = phoneNumbersData?.data?.find(n => n.id === numberId);
-                  return number ? (
-                    <div key={numberId} className="selected-item">
-                      • {number.phone_number} (ID: {numberId})
-                    </div>
-                  ) : null;
-                })}
-              </div>
-            </div>
-          )}
+                     {selectedNumbers.length > 0 && (
+             <div className="selected-numbers">
+               <h4>
+                 <span className="check-icon">✓</span>
+                 Selected Phone Number for Signup
+               </h4>
+               <div className="selected-list">
+                 {(() => {
+                   const number = phoneNumbersData?.data?.find(n => n.id === selectedNumbers[0]);
+                   return number ? (
+                     <div className="selected-item">
+                       • {number.phone_number} (ID: {selectedNumbers[0]})
+                     </div>
+                   ) : null;
+                 })()}
+               </div>
+             </div>
+           )}
         </div>
 
         {/* Launch Section */}
@@ -557,10 +556,10 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
           
           {selectedNumbers.length > 0 ? (
             <>
-              <div className="ready-message">
-                <span className="ready-icon">✓</span>
-                Ready to test with {selectedNumbers.length} verified number{selectedNumbers.length > 1 ? 's' : ''}
-              </div>
+                             <div className="ready-message">
+                 <span className="ready-icon">✓</span>
+                 Ready to test with selected phone number
+               </div>
               
               <div className="config-display">
                 <h4>Configuration Settings</h4>
@@ -630,10 +629,13 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
                 <h4>Generated Configuration</h4>
                 <div className="config-code">
                   <pre>{JSON.stringify({
-                    setup: {
-                      features: ['whatsapp_business_management', 'whatsapp_business_messaging'],
-                      sessionInfoVersion: 3,
-                      preVerifiedPhone: { ids: selectedNumbers }
+                    scope: 'business_management,whatsapp_business_management',
+                    extras: {
+                      feature: 'whatsapp_embedded_signup',
+                      version: 2,
+                                             setup: {
+                         preVerifiedPhone: { ids: selectedNumbers.length > 0 ? [selectedNumbers[0]] : [] }
+                       }
                     }
                   }, null, 2)}</pre>
                 </div>
