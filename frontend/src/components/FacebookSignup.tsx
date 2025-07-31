@@ -279,12 +279,6 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
     setError(null);
     setSignupResult(null);
 
-    const setupConfig = {
-      preVerifiedPhone: {
-        ids: selectedNumbers.length > 0 ? [selectedNumbers[0]] : []  // Only use the first selected number
-      }
-    };
-
     try {
       window.FB.login(fbLoginCallback, {
         config_id: facebookConfigId,
@@ -740,7 +734,7 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
                   <pre>{JSON.stringify({
                     scope: 'business_management,whatsapp_business_management',
                     extras: {
-                      feature: 'whatsapp_embedded_signup',
+                      feature: 'only_waba_sharing',
                       version: 2,
                                              setup: {},
                        featureType: 'only_waba_sharing',
