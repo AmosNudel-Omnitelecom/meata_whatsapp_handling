@@ -292,9 +292,9 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
         override_default_response_type: true,
         scope: 'business_management,whatsapp_business_management',
         extras: {
-          version: "v3",
-          setup: setupConfig,
-          featureType: "whatsapp_business_app_onboarding"
+          setup: {},
+          featureType: 'only_waba_sharing',
+          sessionInfoVersion: '3'
         }
       });
     } catch (err) {
@@ -742,9 +742,9 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
                     extras: {
                       feature: 'whatsapp_embedded_signup',
                       version: 2,
-                                             setup: {
-                         preVerifiedPhone: { ids: selectedNumbers.length > 0 ? [selectedNumbers[0]] : [] }
-                       }
+                                             setup: {},
+                       featureType: 'only_waba_sharing',
+                       sessionInfoVersion: '3'
                     }
                   }, null, 2)}</pre>
                 </div>
