@@ -292,9 +292,9 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
         override_default_response_type: true,
         scope: 'business_management,whatsapp_business_management',
         extras: {
-          feature: 'whatsapp_embedded_signup',
-          version: 2,
-          setup: setupConfig
+          version: "v3",
+          setup: setupConfig,
+          featureType: "whatsapp_business_app_onboarding"
         }
       });
     } catch (err) {
