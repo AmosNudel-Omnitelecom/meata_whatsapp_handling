@@ -36,8 +36,7 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
 //   console.log('Facebook App ID:', facebookAppId ? 'Found' : 'Missing');
 //   console.log('Facebook Config ID:', facebookConfigId ? 'Found' : 'Missing');
   
-  // Feature type for embedded signup (can be customized)
-  const featureType = ''; // Leave blank for default flow
+  // const featureType = ''; // Leave blank for default flow
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [signupResult, setSignupResult] = useState<SignupResult | null>(null);
