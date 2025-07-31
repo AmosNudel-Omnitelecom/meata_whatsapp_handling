@@ -3,7 +3,6 @@ import { useGetPhoneNumbersQuery } from '../store/phoneNumbersApi';
 import './FacebookSignup.css';
 
 interface FacebookSignupProps {
-  setupConfig?: any;
   newlyAddedPhoneId?: string | null;
 }
 
@@ -25,7 +24,6 @@ declare global {
 }
 
 const FacebookSignup: React.FC<FacebookSignupProps> = ({
-  setupConfig,
   newlyAddedPhoneId
 }) => {
   // Get Facebook credentials from environment variables
@@ -35,8 +33,6 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
   // Debug: Log environment variables (remove in production)
 //   console.log('Facebook App ID:', facebookAppId ? 'Found' : 'Missing');
 //   console.log('Facebook Config ID:', facebookConfigId ? 'Found' : 'Missing');
-  
-  // const featureType = ''; // Leave blank for default flow
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [signupResult, setSignupResult] = useState<SignupResult | null>(null);
@@ -88,7 +84,7 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
             appId: facebookAppId,
             autoLogAppEvents: true,
             xfbml: true,
-            version: 'v18.0'
+            version: 'v23.0'
           });
           setIsInitialized(true);
         }
@@ -102,7 +98,7 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'WA_EMBEDDED_SIGNUP') {
-          console.log('📨 Embedded signup message received:', data);
+          console.log('message event: ', data); // remove after testing
           
           // Handle successful flow completion
           if (data.event === 'FINISH' || data.event === 'FINISH_ONLY_WABA' || data.event === 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING') {
@@ -213,9 +209,8 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
             console.log('=== END OTHER EVENT DETAILS ===');
           }
         }
-      } catch (error) {
-        console.error('❌ Error parsing message event:', error);
-        console.log('📨 Raw message data:', event.data);
+      } catch {
+        console.log('message event: ', event.data); // remove after testing
       }
     };
 
@@ -235,14 +230,13 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
   const fbLoginCallback = (response: any) => {
     if (response.authResponse) {
       const code = response.authResponse.code;
-      console.log('Facebook login response code:', code);
-      
+      console.log('response: ', code); // remove after testing
       // Store the code for later use after embedded signup completes
       setAuthCode(code);
       console.log('Facebook login successful, proceeding with embedded signup flow...');
       
     } else {
-      console.log('Facebook login response:', response);
+      console.log('response: ', response); // remove after testing
       const errorDetails = response.error || response.errorMessage || response.error_description || 'Unknown error';
       setError(`Facebook login failed: ${errorDetails}`);
       setIsLoading(false);
@@ -280,15 +274,33 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
     setSignupResult(null);
 
     try {
+      // Reinitialize FB with current appId
+      window.FB.init({
+        appId: facebookAppId,
+        autoLogAppEvents: true,
+        xfbml: true,
+        version: 'v23.0'
+      });
+      
+      // Log the input values
+      console.log('App ID:', facebookAppId);
+      console.log('Config ID:', facebookConfigId);
+      console.log('Selected Numbers:', selectedNumbers);
+      console.log('Parsed IDs:', selectedNumbers.map(id => parseInt(id.trim())).filter(id => !isNaN(id)));
+      
       window.FB.login(fbLoginCallback, {
         config_id: facebookConfigId,
         response_type: 'code',
         override_default_response_type: true,
-        scope: 'business_management,whatsapp_business_management',
         extras: {
-          setup: {},
+          feature: 'whatsapp_embedded_signup',
+          setup: {
+            preVerifiedPhone: {
+              ids: selectedNumbers.map(id => parseInt(id.trim())).filter(id => !isNaN(id))
+            }
+          },
           featureType: 'only_waba_sharing',
-          sessionInfoVersion: '3'
+          sessionInfoVersion: '3',
         }
       });
     } catch (err) {
@@ -732,13 +744,18 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
                 <h4>Generated Configuration</h4>
                 <div className="config-code">
                   <pre>{JSON.stringify({
-                    scope: 'business_management,whatsapp_business_management',
+                    config_id: facebookConfigId,
+                    response_type: 'code',
+                    override_default_response_type: true,
                     extras: {
-                      feature: 'only_waba_sharing',
-                      version: 2,
-                                             setup: {},
-                       featureType: 'only_waba_sharing',
-                       sessionInfoVersion: '3'
+                      feature: 'whatsapp_embedded_signup',
+                      setup: {
+                        preVerifiedPhone: {
+                          ids: selectedNumbers.map(id => parseInt(id.trim())).filter(id => !isNaN(id))
+                        }
+                      },
+                      featureType: 'only_waba_sharing',
+                      sessionInfoVersion: '3',
                     }
                   }, null, 2)}</pre>
                 </div>
