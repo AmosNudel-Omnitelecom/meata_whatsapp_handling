@@ -102,10 +102,22 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'WA_EMBEDDED_SIGNUP') {
-          console.log('message event: ', data); // remove after testing
+          console.log('📨 Embedded signup message received:', data);
           
           // Handle successful flow completion
           if (data.event === 'FINISH' || data.event === 'FINISH_ONLY_WABA' || data.event === 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING') {
+            console.log('🎉 Embedded signup completed successfully!');
+            console.log('📊 Raw signup data:', JSON.stringify(data, null, 2));
+            
+            // Log detailed information about the created WABA
+            console.log('🔍 === WABA CREATION DETAILS ===');
+            console.log('WABA ID:', data.data?.waba_id);
+            console.log('Phone Number ID:', data.data?.phone_number_id);
+            console.log('Business ID:', data.data?.business_id);
+            console.log('Event Type:', data.event);
+            console.log('Timestamp:', new Date().toISOString());
+            console.log('=== END WABA CREATION DETAILS ===');
+            
             const result: SignupResult = {
               waba_id: data.data?.waba_id,
               phone_number_id: data.data?.phone_number_id,
@@ -120,7 +132,10 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
             
             // Exchange the authorization code for a business token
             if (authCode && data.data?.waba_id) {
-              console.log('Exchanging authorization code for business token...');
+              console.log('🔄 Exchanging authorization code for business token...');
+              console.log('Auth Code:', authCode.substring(0, 20) + '...');
+              console.log('WABA ID for token exchange:', data.data.waba_id);
+              
               try {
                 const tokenResponse = await fetch('/exchange-code-for-token', {
                   method: 'POST',
@@ -136,22 +151,35 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
                 const tokenData = await tokenResponse.json();
                 
                 if (tokenData.error) {
-                  console.error('Token exchange failed:', tokenData.error);
+                  console.error('❌ Token exchange failed:', tokenData.error);
                   setError(`Token exchange failed: ${tokenData.error}`);
                 } else {
-                  console.log('Business token received successfully:', {
+                  console.log('✅ Business token received successfully:', {
                     success: tokenData.success,
                     waba_id: tokenData.waba_id,
                     message: tokenData.message
                   });
+                  
+                  // Log token exchange details
+                  console.log('🔍 === TOKEN EXCHANGE DETAILS ===');
+                  console.log('Token Exchange Success:', tokenData.success);
+                  console.log('WABA ID:', tokenData.waba_id);
+                  console.log('Token Message:', tokenData.message);
+                  console.log('Token Length:', tokenData.access_token ? tokenData.access_token.length : 'N/A');
+                  console.log('=== END TOKEN EXCHANGE DETAILS ===');
+                  
                   showMessage('success', `Business token exchanged successfully for WABA: ${data.data.waba_id}`);
+                  
+                  // Gather comprehensive debug information
+                  console.log('🔍 Starting comprehensive debug information gathering...');
+                  await gatherDebugInfo(data.data.waba_id, data.data?.phone_number_id);
                 }
               } catch (error) {
-                console.error('Error exchanging code for token:', error);
+                console.error('❌ Error exchanging code for token:', error);
                 setError('Failed to exchange authorization code for business token');
               }
             } else {
-              console.warn('Cannot exchange token: missing auth code or waba_id', {
+              console.warn('⚠️ Cannot exchange token: missing auth code or waba_id', {
                 hasAuthCode: !!authCode,
                 wabaId: data.data?.waba_id
               });
@@ -159,6 +187,14 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
           }
           // Handle abandoned flow
           else if (data.event === 'CANCEL') {
+            console.log('❌ Embedded signup was cancelled:', data);
+            console.log('🔍 === SIGNUP CANCELLATION DETAILS ===');
+            console.log('Current Step:', data.data?.current_step);
+            console.log('Error Message:', data.data?.error_message);
+            console.log('Error ID:', data.data?.error_id);
+            console.log('Cancellation Reason:', data.data?.reason || 'User cancelled');
+            console.log('=== END CANCELLATION DETAILS ===');
+            
             if (data.data?.current_step) {
               setError(`Flow abandoned at step: ${data.data.current_step}`);
             } else if (data.data?.error_message) {
@@ -168,9 +204,18 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
             }
             setIsLoading(false);
           }
+          // Handle other events
+          else {
+            console.log('📨 Other embedded signup event:', data.event, data);
+            console.log('🔍 === OTHER EVENT DETAILS ===');
+            console.log('Event Type:', data.event);
+            console.log('Event Data:', JSON.stringify(data.data, null, 2));
+            console.log('=== END OTHER EVENT DETAILS ===');
+          }
         }
       } catch (error) {
-        console.log('message event: ', event.data); // remove after testing
+        console.error('❌ Error parsing message event:', error);
+        console.log('📨 Raw message data:', event.data);
       }
     };
 
@@ -327,6 +372,71 @@ const FacebookSignup: React.FC<FacebookSignupProps> = ({
     setShowAllNumbers(false);
   };
 
+  // Function to gather comprehensive debug information
+  const gatherDebugInfo = async (wabaId: string, phoneNumberId?: string) => {
+    console.log('🔍 Gathering comprehensive debug information...');
+    console.log('🔍 === DEBUG INFORMATION GATHERING START ===');
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('WABA ID:', wabaId);
+    console.log('Phone Number ID:', phoneNumberId || 'N/A');
+
+    try {
+      // 1. Get WABA details with phone numbers
+      console.log('📋 Fetching WABA details...');
+      const wabaResponse = await fetch(`/waba-data/${wabaId}/with-phone-numbers`);
+      const wabaData = await wabaResponse.json();
+      console.log('✅ WABA details:', JSON.stringify(wabaData, null, 2));
+
+      // 2. Get phone numbers from Facebook API
+      console.log('📞 Fetching phone numbers from Facebook API...');
+      const phoneResponse = await fetch(`/waba-phone-numbers/${wabaId}`);
+      const phoneData = await phoneResponse.json();
+      console.log('✅ Phone numbers from Facebook:', JSON.stringify(phoneData, null, 2));
+
+      // 3. Get WABA subscriptions
+      console.log('🔔 Fetching WABA subscriptions...');
+      const subResponse = await fetch(`/waba-subscriptions/${wabaId}`);
+      const subData = await subResponse.json();
+      console.log('✅ WABA subscriptions:', JSON.stringify(subData, null, 2));
+
+      // 4. Get stored phone numbers
+      console.log('💾 Fetching stored phone numbers...');
+      const storedResponse = await fetch(`/stored-phone-numbers/${wabaId}`);
+      const storedData = await storedResponse.json();
+      console.log('✅ Stored phone numbers:', JSON.stringify(storedData, null, 2));
+
+      // 5. Log summary
+      console.log('🔍 === DEBUG SUMMARY ===');
+      console.log('WABA Details Available:', !!wabaData);
+      console.log('Phone Numbers Count:', phoneData?.data?.length || 0);
+      console.log('Subscriptions Count:', subData?.data?.length || 0);
+      console.log('Stored Phone Numbers Count:', storedData?.phone_numbers?.length || 0);
+      
+      // 6. Log phone number status details
+      if (phoneData?.data && phoneData.data.length > 0) {
+        console.log('📱 === PHONE NUMBER STATUS DETAILS ===');
+        phoneData.data.forEach((phone: any, index: number) => {
+          console.log(`Phone ${index + 1}:`);
+          console.log('  - ID:', phone.id);
+          console.log('  - Display Number:', phone.display_phone_number);
+          console.log('  - Verification Status:', phone.code_verification_status);
+          console.log('  - Verification Expiry:', phone.verification_expiry_time);
+          console.log('  - Quality Rating:', phone.quality_rating);
+          console.log('  - Name Status:', phone.name_status);
+        });
+        console.log('=== END PHONE NUMBER STATUS DETAILS ===');
+      }
+
+      console.log('🔍 === DEBUG INFORMATION GATHERING COMPLETE ===');
+
+    } catch (error) {
+      console.error('❌ Error gathering debug info:', error);
+      console.log('🔍 === DEBUG ERROR ===');
+      console.log('Error Type:', error instanceof Error ? error.constructor.name : typeof error);
+      console.log('Error Message:', error instanceof Error ? error.message : String(error));
+      console.log('=== END DEBUG ERROR ===');
+    }
+  };
 
 
   return (
