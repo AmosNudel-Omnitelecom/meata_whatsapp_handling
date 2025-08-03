@@ -65,7 +65,7 @@ async def get_phone_numbers():
             return {"error": "BUSINESS_PORTFOLIO_ID not found in environment variables"}
             
         # Facebook Graph API endpoint - use preverified_numbers endpoint
-        url = f"https://graph.facebook.com/v18.0/{business_portfolio_id}/preverified_numbers"
+        url = f"https://graph.facebook.com/v23.0/{business_portfolio_id}/preverified_numbers"
         
         
         if not ACCESS_TOKEN:
@@ -103,7 +103,7 @@ async def get_wabas():
             return {"error": "ACCESS_TOKEN not found in environment variables"}
         
         # Facebook Graph API endpoint for owned WhatsApp Business Accounts
-        url = f"https://graph.facebook.com/v18.0/{business_portfolio_id}/owned_whatsapp_business_accounts"
+        url = f"https://graph.facebook.com/v23.0/{business_portfolio_id}/owned_whatsapp_business_accounts"
         
         # Add access token to request parameters
         params = {
@@ -137,7 +137,7 @@ async def get_client_wabas():
             return {"error": "ACCESS_TOKEN not found in environment variables"}
         
         # Facebook Graph API endpoint for client WhatsApp Business Accounts
-        url = f"https://graph.facebook.com/v18.0/{business_portfolio_id}/client_whatsapp_business_accounts"
+        url = f"https://graph.facebook.com/v23.0/{business_portfolio_id}/client_whatsapp_business_accounts"
         
         # Add access token and filtering to request parameters
         params = {
@@ -172,7 +172,7 @@ async def get_waba_phone_numbers(waba_id: str, db: Session = Depends(get_db)):
             return {"error": "No access token available"}
         
         # Facebook Graph API endpoint for WABA phone numbers
-        url = f"https://graph.facebook.com/v18.0/{waba_id}/phone_numbers"
+        url = f"https://graph.facebook.com/v23.0/{waba_id}/phone_numbers"
         
         # Add access token to request parameters
         params = {
@@ -256,7 +256,7 @@ async def add_phone_number(request: PhoneNumberRequest):
             return {"error": "ACCESS_TOKEN not found in environment variables"}
         
         # Facebook Graph API endpoint for adding phone numbers
-        url = f"https://graph.facebook.com/v18.0/{business_portfolio_id}/add_phone_numbers"
+        url = f"https://graph.facebook.com/v23.0/{business_portfolio_id}/add_phone_numbers"
         print(f"Calling Facebook API: {url}")
         
         # Prepare the request data
@@ -303,7 +303,7 @@ async def delete_phone_number(number_id: str):
             return {"error": "ACCESS_TOKEN not found in environment variables"}
         
         # Facebook Graph API endpoint for deleting phone numbers
-        url = f"https://graph.facebook.com/v18.0/{number_id}"
+        url = f"https://graph.facebook.com/v23.0/{number_id}"
         
         # Add access token to request parameters
         params = {
@@ -335,7 +335,7 @@ async def request_verification_code(number_id: str):
             return {"error": "ACCESS_TOKEN not found in environment variables"}
         
         # First, get the phone number details to show which number we're sending SMS to
-        phone_details_url = f"https://graph.facebook.com/v18.0/{number_id}"
+        phone_details_url = f"https://graph.facebook.com/v23.0/{number_id}"
         phone_params = {
             "access_token": ACCESS_TOKEN,
             "fields": "phone_number,code_verification_status"
@@ -353,7 +353,7 @@ async def request_verification_code(number_id: str):
             print(f"Failed to get phone number details: {phone_response.status_code}")
         
         # Facebook Graph API endpoint for requesting verification code
-        url = f"https://graph.facebook.com/v18.0/{number_id}/request_code"
+        url = f"https://graph.facebook.com/v23.0/{number_id}/request_code"
         print(f"Calling Facebook API: {url}")
         
         # Add access token and required parameters
@@ -401,7 +401,7 @@ async def verify_code(number_id: str, code: str):
             return {"error": "ACCESS_TOKEN not found in environment variables"}
         
         # Facebook Graph API endpoint for verifying code
-        url = f"https://graph.facebook.com/v18.0/{number_id}/verify_code"
+        url = f"https://graph.facebook.com/v23.0/{number_id}/verify_code"
         print(f"Calling Facebook API: {url}")
         
         # Add access token and verification code
@@ -479,7 +479,7 @@ async def register_phone_number(waba_phone_number_id: str, request: RegisterPhon
             return {"error": "ACCESS_TOKEN not found in environment variables"}
         
         # Facebook Graph API endpoint for registering phone number
-        url = f"https://graph.facebook.com/v18.0/{waba_phone_number_id}/register"
+        url = f"https://graph.facebook.com/v23.0/{waba_phone_number_id}/register"
         print(f"Calling Facebook API: {url}")
         
         # Prepare the request body
@@ -538,7 +538,7 @@ async def subscribe_webhooks(waba_id: str, db: Session = Depends(get_db)):
             return {"error": "No access token available"}
         
         # Facebook Graph API endpoint for subscribing to webhooks
-        url = f"https://graph.facebook.com/v18.0/{waba_id}/subscribed_apps"
+        url = f"https://graph.facebook.com/v23.0/{waba_id}/subscribed_apps"
         
         # Add access token to request parameters
         params = {
@@ -580,7 +580,7 @@ async def get_waba_subscriptions(waba_id: str, db: Session = Depends(get_db)):
             return {"error": "No access token available"}
         
         # Facebook Graph API endpoint for getting WABA subscriptions
-        url = f"https://graph.facebook.com/v18.0/{waba_id}/subscribed_apps"
+        url = f"https://graph.facebook.com/v23.0/{waba_id}/subscribed_apps"
         print(f"Calling Facebook API: {url}")
         
         # Add access token to request parameters
@@ -630,7 +630,7 @@ async def exchange_code_for_token(request: WabaRequest, db: Session = Depends(ge
             return {"error": "FACEBOOK_APP_ID or FACEBOOK_APP_SECRET not found in environment variables"}
         
         # Exchange code for access token
-        url = "https://graph.facebook.com/v21.0/oauth/access_token"
+        url = "https://graph.facebook.com/v23.0/oauth/access_token"
         params = {
             "client_id": FACEBOOK_APP_ID,
             "client_secret": FACEBOOK_APP_SECRET,
@@ -846,7 +846,7 @@ async def deregister_phone_number(number_id: str):
             return {"error": "ACCESS_TOKEN not found in environment variables"}
         
         # Facebook Graph API endpoint for deregistering phone number
-        url = f"https://graph.facebook.com/v18.0/{number_id}/deregister"
+        url = f"https://graph.facebook.com/v23.0/{number_id}/deregister"
         
         # Add access token to request parameters
         params = {
